@@ -2,6 +2,7 @@
 import pandas as pd
 import pandapower as pp
 import pandapower.networks as pn
+import numpy as np
 import pandapower.plotting as ppl
 # -*- coding: utf-8 -*-
 # To install scipy I went at https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy
@@ -107,6 +108,29 @@ def empty_value_preprocessing(input_df, types=['reduction'], unreduced_df=None):
         for index, row in input_df.iterrows():
             if boolean_df.loc[index]:
                 empty_list.append(row)
+    if 'statistical' in types:
+        non_empty_list = []
+        for index, row in input_df.iterrows():
+            if not boolean_df.loc[index]:
+                non_empty_list.append(row)
+        reduced_df = pd.DataFrame(non_empty_list, columns=input_df.columns)
+        reduced_df = reduced_df.drop([input_df.columns[0]], axis=1)
+        input_df = input_df.drop([input_df.columns[0]], axis=1)
+        mean_filled_list = []
+        for index, row in input_df.iterrows():
+            if not boolean_df.loc[index]:
+                mean_filled_list.append(row)
+            else:
+                new_row = row.copy()
+                row_bool = row.isnull()
+                for jdex in range(0, len(row_bool)):
+                    if row_bool[jdex]:
+                        #print(new_row.at[input_df.columns[jdex]])
+                        new_row.at[input_df.columns[jdex]] = np.mean(reduced_df.iloc[:, jdex])
+                        #print(new_row.at[input_df.columns[jdex]])
+                mean_filled_list.append(new_row)
+        statistical_df = pd.DataFrame(mean_filled_list, columns=input_df.columns)
+        new_dataset_dict['statistical'] = statistical_df
     return new_dataset_dict
 
 
