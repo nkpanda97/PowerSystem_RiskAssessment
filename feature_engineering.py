@@ -3,6 +3,7 @@ import pandas as pd
 import pandapower as pp
 import pandapower.networks as pn
 import numpy as np
+import matplotlib.pyplot as plt
 import pandapower.plotting as ppl
 # -*- coding: utf-8 -*-
 # To install scipy I went at https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy
@@ -125,9 +126,7 @@ def empty_value_preprocessing(input_df, types=['reduction'], unreduced_df=None):
                 row_bool = row.isnull()
                 for jdex in range(0, len(row_bool)):
                     if row_bool[jdex]:
-                        #print(new_row.at[input_df.columns[jdex]])
                         new_row.at[input_df.columns[jdex]] = np.mean(reduced_df.iloc[:, jdex])
-                        #print(new_row.at[input_df.columns[jdex]])
                 mean_filled_list.append(new_row)
         statistical_df = pd.DataFrame(mean_filled_list, columns=input_df.columns)
         new_dataset_dict['statistical'] = statistical_df
@@ -148,22 +147,49 @@ def remove_features(input_df):
     return new_df
 
 
-def add_feature(input):
+def plot_features_variance(input_df):
+    variances = input_df.var(axis=0)
+    thresholds = [0.0000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100]
+    y = []
+    for threshold in thresholds:
+        drop = 0
+
+        for i in range(1, len(input_df.columns)):
+            # ignore first column because it is the index
+            if variances.iloc[i] < threshold:
+                drop = drop + 1
+        y.append(drop)
+    fig = plt.figure()
+    plt.rcParams['axes.axisbelow'] = True
+    thresholds_str = [str(thr) for thr in thresholds ]
+    plt.bar(thresholds_str, y)
+    plt.ylabel('Amount of features Dropped')
+    plt.xlabel('Variance Threshold')
+    plt.title('Feature Removal per Variance Threshold')
+    plt.ylim(top= max(y)+5, bottom= min(y)-5)
+    plt.grid()
+    fig.savefig('feature_variance.png', dpi=600)
+    return
+
+
+def add_feature(input_df):
     """
-    
 
     Parameters
     ----------
-    Input : Pandas dataframe
+    input_df : Pandas dataframe
         Povided dataset
 
     Returns
     -------
-    new_data : Tpandas dataframe or np array
+    new_dataframe : pandas dataframe
         Data with new features combined
 
     """
 
     return
-    
+
+
+def feature_addition(input_df, new_column_list, new_column_name):
+    return input_df.insert(0, new_column_name, new_column_list)
 
