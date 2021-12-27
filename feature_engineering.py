@@ -5,6 +5,7 @@ import pandapower.networks as pn
 import numpy as np
 import matplotlib.pyplot as plt
 import pandapower.plotting as ppl
+from sklearn.preprocessing import StandardScaler
 # -*- coding: utf-8 -*-
 # To install scipy I went at https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy
 
@@ -42,6 +43,57 @@ def plot_feature_properties(Input):
     None.
 
     """
+    return
+
+
+def split_input_output(input_df):
+    x = input_df.iloc[:, :-1]
+    y = input_df.iloc[:, -1]
+    return x, y
+
+
+def create_input_output_for_all(input_dict):
+    new_dict = {}
+    for key in input_dict:
+        input_df = input_dict[key]
+        x, y = split_input_output(input_df)
+        new_dict[key] = {'X': x, 'Y': y}
+    return new_dict
+
+
+def standardization_preprocessing(input_dict):
+    new_dict = {}
+    for key in input_dict:
+        xy_dict = input_dict[key]
+        x = xy_dict['X']
+        new_dict[key] = {'X': standardize(x), 'Y': xy_dict['Y']}
+    return new_dict
+
+
+def create_classification_dict(xy_dict):
+    classification_dict = {}
+    for key in xy_dict:
+        x = xy_dict[key]['X']
+        y = xy_dict[key]['Y']
+        new_y_list = []
+        for value in y:
+            if value < 0.1:
+                y_new = 0
+            elif value < 0.35:
+                y_new = 1
+            elif value < 0.7:
+                y_new = 2
+            else:
+                y_new = 3
+            new_y_list.append(y_new)
+            new_y_df = pd.DataFrame(new_y_list, columns=['Risk State'])
+        classification_dict[key] = {'X': x, 'Y': new_y_df}
+    return classification_dict
+
+
+def standardize(x):
+    scaler = StandardScaler()
+    return pd.DataFrame(scaler.fit_transform(x), columns=x.columns)
 
 
 def empty_value_preprocessing(input_df, types=['reduction'], unreduced_df=None):
@@ -172,6 +224,13 @@ def plot_features_variance(input_df):
     return
 
 
+def save_datasets(dataset_dict, task_type='not_given'):
+    for key in dataset_dict:
+        dataset_dict[key]['X'].to_pickle(f'datasets/{task_type}_x_{key}')
+        dataset_dict[key]['Y'].to_pickle(f'datasets/{task_type}_y_{key}')
+    return
+
+
 def add_feature(input_df):
     """
 
@@ -193,3 +252,24 @@ def add_feature(input_df):
 def feature_addition(input_df, new_column_list, new_column_name):
     return input_df.insert(0, new_column_name, new_column_list)
 
+
+def full_preprocessing_pipeline(input_data_df):
+    # Remove features with 0 variance
+    reduced_data_df = remove_features(input_data_df)
+    # Plot amount of removed features per variance threshold
+    plot_features_variance(input_data_df)
+    # Create a dictionary with 2 datasets, 1 with removed datapoints whenever a feature has no value and 1 were
+    # all missing values are replaced with the mean of that feature
+    data_dict = empty_value_preprocessing(reduced_data_df, types=['reduction', 'statistical'],
+                                          unreduced_df=input_data_df)
+
+    # split inputs and outputs per set
+    xy_dict = create_input_output_for_all(data_dict)
+    # standardize input per dataset
+    standardized_xy_dict = standardization_preprocessing(xy_dict)
+    # print(standardized_xy_dict)
+    final_regression_dict = standardized_xy_dict
+    final_classification_dict = create_classification_dict(standardized_xy_dict)
+    save_datasets(final_regression_dict, task_type='regression')
+    save_datasets(final_classification_dict, task_type='classification')
+    return final_regression_dict, final_classification_dict
