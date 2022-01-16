@@ -194,7 +194,7 @@ def remove_features(input_df):
         if variances.iloc[i] < 0.000000001:
             dropping_columns.append(input_df.columns[i])
             new_df = new_df.drop([input_df.columns[i]], axis=1)
-    print(f"Dropping columns {dropping_columns}")
+    print(f"Dropping {len(dropping_columns)} columns {dropping_columns}")
     print(new_df.shape)
     return new_df
 

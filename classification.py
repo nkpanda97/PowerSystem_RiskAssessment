@@ -53,7 +53,7 @@ def random_forests_classification(X_train, X_test, y_train, y_test, hyperparamet
 
 def nn_mlp_classification(X_train, X_test, y_train, y_test, hyperparameter_dict={}):
     hyperparameter_dict = {}
-    hidden_layer_sizes = hyperparameter_dict.get('hidden_layer_sizes', (512, 512, 256, 256, 128, 128))
+    hidden_layer_sizes = hyperparameter_dict.get('hidden_layer_sizes', (1024, 1024, 256, 256, 128, 128))
     activation = hyperparameter_dict.get('activation', 'relu')
     solver = hyperparameter_dict.get('solver', 'adam')
     alpha = hyperparameter_dict.get('alpha', 0.001)
@@ -68,13 +68,15 @@ def nn_mlp_classification(X_train, X_test, y_train, y_test, hyperparameter_dict=
                         tol=tol, momentum=momentum, max_iter=200, random_state=4720)
     clf.fit(X_train, y_train)
     test_score = clf.score(X_test, y_test)
+    print(f'Training precision recall fscore results {precision_recall_fscore_support(y_train, clf.predict(X_train))}')
+    print(f'Test precision recall fscore results {precision_recall_fscore_support(y_test, clf.predict(X_test))}')
     return clf, test_score, {'hidden_layer_sizes': hidden_layer_sizes, 'activation': activation, 'solver': solver,
                              'alpha': alpha, 'batch_size': batch_size, 'learning_rate': learning_rate,
                              'learning_rate_init': learning_rate_init, 'tol': tol, 'momentum': momentum}
 
 
 def extra_trees_grid_search(X_train, y_train):
-    parameters = {'n_estimators': [1000], 'criterion': ('gini', 'entropy')}
+    parameters = {'n_estimators': [1000, 5000], 'criterion': ('gini', 'entropy')}
     etc = ExtraTreesClassifier(random_state=4720)
     grid_search = GridSearchCV(etc, parameters, cv=10)
     grid_search.fit(X_train, y_train)
@@ -94,15 +96,11 @@ def svc_grid_search(X_train, y_train, type='rbf'):
 
 
 def nn_mlp_grid_search(X_train, y_train):
-    parameters = {'hidden_layer_sizes': [(128, 128, 128, 128)], 'activation': ['logistic'
-                  , 'tanh', 'relu'], 'solver': ['lbfgs', 'sgd', 'adam'], 'alpha': [0.001, 0.01],
-                  'batch_size': ['auto', 32, 64], 'learning_rate': ['invscaling', 'adaptive'],
-                  'learning_rate_init': [0.001, 0.01], 'momentum': [0.9, 0.5]}
-    parameters = {'hidden_layer_sizes': [(128, 128, 128, 128, 128, 128)], 'activation': ['relu'], 'solver': ['adam'],
+    parameters = {'hidden_layer_sizes': [(1024, 1024, 256, 256, 128, 128)], 'activation': ['relu'], 'solver': ['adam'],
                   'alpha': [0.001], 'batch_size': ['auto'], 'learning_rate': ['invscaling'],
-                  'learning_rate_init': [0.01], 'momentum': [0.8]}
+                  'learning_rate_init': [0.01]}
     mlp = MLPClassifier(random_state=4720, max_iter=20)
-    grid_search = GridSearchCV(mlp, parameters, cv=5)
+    grid_search = GridSearchCV(mlp, parameters, cv=10)
     grid_search.fit(X_train, y_train)
     clf = grid_search.best_estimator_
     best_params = grid_search.best_params_
@@ -161,7 +159,7 @@ def classification_pipeline(dataset_type='reduction', test_size=0.2, choose_mode
             trained_model, test_score, params = nn_mlp_classification(X_train, X_test, y_train, y_test,
                                                                       hyperparameter_dict=hyperparameters)
     print(f"For dataset type {dataset_type}, the model type {method}, and parameters {params}, the test score is {test_score}")
-    #print(f"The rest of the info is test: {test_scores}, parameters {case_parameters}")
+    print(f"The rest of the info is test: {test_scores}, parameters {case_parameters}")
     return
 
 
