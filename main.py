@@ -7,17 +7,19 @@ import pickle
 import time
 
 if __name__ == "__main__":
+    ###### Task-1 Pre-processing pipeline-----------------------------------------------------------------------------
     input_data_df = pd.read_csv(r'Project_InputData.csv')
     final_regression_dict, final_classification_dict = full_preprocessing_pipeline(input_data_df)
+    
     ###### TASK-2 REGRESSION--------------------------------------------------------------------------------------------
-    # compare_regression_script_() # Run comparasion for regression performance and plot group barplots
-    # ----------- Run grid search on the neural netwoork model and save it as pickle
-    # grid_search_results, best_params, trained_reg_model = regression_pipeline(dataset_type='statistical', choose_model=True, hyperparameters={})
-    # pickle.dump({'GridSearchResults': grid_search_results, 'BestParameters': best_params,
-    #              'TrainedModel':trained_reg_model}
-    #             , open('Regression_reults_statistical.pkl', 'wb'))
+    compare_regression_script_() # Run comparasion for regression performance and plot group barplots
+    # Run grid search on the neural netwoork model and save it as pickle
+    grid_search_results, best_params, trained_reg_model = regression_pipeline(dataset_type='statistical', choose_model=False, hyperparameters={})
+    pickle.dump({'GridSearchResults': grid_search_results, 'BestParameters': best_params,
+                 'TrainedModel':trained_reg_model}
+                , open('Regression_reults_statistical.pkl', 'wb')) # choose_model= True will re-search and take very large time, choose_model= False will re trainusing default parameters
 
-    # Analyse best models
+    # Analyse best regression mdoel
     start = time.time()
     scores_reduction = regression_best_model_scores(datatyperead='reduction')
     scores_statistical = regression_best_model_scores(datatyperead='statistical')
@@ -26,7 +28,9 @@ if __name__ == "__main__":
     stop = time.time()
     print('Performance scores of regressor and regressor as classifier')
     print('Time taken to train and grid search is %.2f',(stop-start))
-    # Task 3 Classification
+    
+    
+    ####### Task 3 Classification-----------------------------------------------------------------------------------------
     start = time.time()
 
     best_reduction_model = classification_pipeline(dataset_type='reduction', test_size=0.2, choose_model=True,
