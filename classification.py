@@ -159,7 +159,8 @@ def classification_pipeline(dataset_type='reduction', test_size=0.2, choose_mode
             trained_model, test_score, params = nn_mlp_classification(X_train, X_test, y_train, y_test,
                                                                       hyperparameter_dict=hyperparameters)
     print(f"For dataset type {dataset_type}, the model type {method}, and parameters {params}, the test score is {test_score}")
-    print(f"The rest of the info is test: {test_scores}, parameters {case_parameters}")
-    return
+    if choose_model:
+        print(f"The rest of the info is test: {test_scores}, parameters {case_parameters}")
+    return trained_model
 
 
