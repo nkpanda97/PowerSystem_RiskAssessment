@@ -27,25 +27,25 @@ The following tasks are performed under this:
 The following tasks are performed under this:
 Calling the classification pipeline function does everything
 - If Choose model is said to True:
-   -When calling the classification pipeline function:
-   -specify the dataset type to be read
-   -specify the chosen model
+   - When calling the classification pipeline function:
+   - specify the dataset type to be read
+   - specify the chosen model
    - Choose and fine tune any of the models:
-   - SVC- Linear
-   - SVC- Polynomial
-   - SVC-RBF
-   - Random Forests Classifier
-   - Extreme Trees Classifier
-   - MLP Neural Network
+      - SVC- Linear
+      - SVC- Polynomial
+      - SVC-RBF
+      - Random Forests Classifier
+      - Extreme Trees Classifier
+      - MLP Neural Network
    - Get the validation accuracy, and test accuracy, per class precision, recall and f1 score
    for the fine-tuned model, also get the trained model
 
 - If Choose model is said to False:
-   -When calling the classification pipeline function:
-   -specify the hyperparameters dictionary with the final chosen hyperparameters
-   -specify the dataset type to be read
-   -specify the chosen model
-   -The final model of type 'x' is chosen and the test results are printed, the trained model is returned
+   - When calling the classification pipeline function:
+   - specify the hyperparameters dictionary with the final chosen hyperparameters
+   - specify the dataset type to be read
+   - specify the chosen model
+   - The final model of type 'x' is chosen and the test results are printed, the trained model is returned
 
 
 ## How to run the files?
